@@ -6,6 +6,14 @@
       "telefono": "3217532037",
       "correo": "gabodorado@gmail.com",
       "etiqueta": "profe"
+    },
+    {
+      "nombre": "Dainer Ruiz Morelo",
+      "telefono": "3233108382",
+      "correo": "dainerruiz8@gmail.com",
+      "etiqueta": "",
+      "id": "CgMJPYvkdNk"
     }
-  ]
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
 }
