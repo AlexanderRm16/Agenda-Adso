@@ -1,5 +1,13 @@
-import { useState } from "react";
-function FormularioContacto({ onAgregar }) {
+// Archivo: src/components/FormularioContacto.jsx
+
+import { useState, useEffect } from "react";
+
+export default function FormularioContacto({
+  onAgregar,
+  contactoEnEdicion, 
+  onActualizar,  
+  onCancelarEdicion, 
+}) {
   const [form, setForm] = useState({
     nombre: "",
     telefono: "",
@@ -15,6 +23,21 @@ function FormularioContacto({ onAgregar }) {
 
   const [enviando, setEnviando] = useState(false);
 
+  useEffect(() => {
+    if (contactoEnEdicion) {
+      setForm(contactoEnEdicion);
+      setErrores({ nombre: "", telefono: "", correo: "" });
+    } else {
+      setForm({
+        nombre: "",
+        telefono: "",
+        correo: "",
+        etiqueta: "",
+      });
+      setErrores({ nombre: "", telefono: "", correo: "" });
+    }
+  }, [contactoEnEdicion]);
+
   const onChange = (e) => {
     const { name, value } = e.target;
 
@@ -25,7 +48,11 @@ function FormularioContacto({ onAgregar }) {
   };
 
   function validarFormulario() {
-    const nuevosErrores = { nombre: "", telefono: "", correo: "" };
+    const nuevosErrores = {
+      nombre: "",
+      telefono: "",
+      correo: "",
+    };
 
     if (!form.nombre.trim()) {
       nuevosErrores.nombre = "El nombre es obligatorio.";
@@ -33,12 +60,14 @@ function FormularioContacto({ onAgregar }) {
 
     if (!form.telefono.trim()) {
       nuevosErrores.telefono = "El teléfono es obligatorio.";
+    } else if (form.telefono.trim().length < 7) {
+      nuevosErrores.telefono = "El teléfono debe tener al menos 7 dígitos.";
     }
 
     if (!form.correo.trim()) {
       nuevosErrores.correo = "El correo es obligatorio.";
     } else if (!form.correo.includes("@")) {
-      nuevosErrores.correo = "El correo debe contener @.";
+      nuevosErrores.correo = "Ingresa un correo electrónico válido.";
     }
 
     setErrores(nuevosErrores);
@@ -51,24 +80,30 @@ function FormularioContacto({ onAgregar }) {
   }
 
   const onSubmit = async (e) => {
-
     e.preventDefault();
 
     const esValido = validarFormulario();
-    if (!esValido) return;
+
+    if (!esValido) {
+      return;
+    }
 
     try {
-
       setEnviando(true);
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      await onAgregar(form);
 
-      setForm({
-        nombre: "",
-        telefono: "",
-        correo: "",
-        etiqueta: "",
-      });
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      if (contactoEnEdicion) {
+        await onActualizar(form); // Llama a la función de actualización[cite: 1]
+      } else {
+        await onAgregar(form); // Llama a la función de agregar[cite: 1]
+        setForm({
+          nombre: "",
+          telefono: "",
+          correo: "",
+          etiqueta: "",
+        });
+      }
 
       setErrores({
         nombre: "",
@@ -82,23 +117,24 @@ function FormularioContacto({ onAgregar }) {
 
   return (
     <form
-      className="bg-white shadow-sm rounded-2xl p-6 space-y-4 mb-8"
       onSubmit={onSubmit}
+      className="bg-white shadow-sm rounded-2xl p-6 space-y-4 mb-8"
     >
       <h2 className="text-lg font-semibold text-gray-900 mb-2">
-        Nuevo contacto
+        {contactoEnEdicion ? "Editar contacto" : "Nuevo contacto"}
       </h2>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Nombre *
         </label>
+
         <input
-          className="w-full rounded-xl border-gray-300 focus:ring-purple-500 focus:border-purple-500"
+          className="w-full rounded-xl border border-gray-300 focus:ring-purple-500 focus:border-purple-500 px-4 py-3"
           name="nombre"
           placeholder="Ej: Camila Pérez"
-          value={form.nombre}    
-          onChange={onChange}    
+          value={form.nombre}
+          onChange={onChange}
         />
 
         {errores.nombre && (
@@ -110,13 +146,15 @@ function FormularioContacto({ onAgregar }) {
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Teléfono *
         </label>
+
         <input
-          className="w-full rounded-xl border-gray-300 focus:ring-purple-500 focus:border-purple-500"
+          className="w-full rounded-xl border border-gray-300 focus:ring-purple-500 focus:border-purple-500 px-4 py-3"
           name="telefono"
           placeholder="Ej: 300 123 4567"
-          value={form.telefono} 
+          value={form.telefono}
           onChange={onChange}
         />
+
         {errores.telefono && (
           <p className="mt-1 text-xs text-red-600">{errores.telefono}</p>
         )}
@@ -126,23 +164,28 @@ function FormularioContacto({ onAgregar }) {
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Correo *
         </label>
+
         <input
-          className="w-full rounded-xl border-gray-300 focus:ring-purple-500 focus:border-purple-500"
+          className="w-full rounded-xl border border-gray-300 focus:ring-purple-500 focus:border-purple-500 px-4 py-3"
           name="correo"
+          type="email"
           placeholder="Ej: camila@sena.edu.co"
-          value={form.correo} 
+          value={form.correo}
           onChange={onChange}
         />
+
         {errores.correo && (
           <p className="mt-1 text-xs text-red-600">{errores.correo}</p>
         )}
       </div>
+
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Etiqueta (opcional)
         </label>
+
         <input
-          className="w-full rounded-xl border-gray-300 focus:ring-purple-500 focus:border-purple-500"
+          className="w-full rounded-xl border border-gray-300 focus:ring-purple-500 focus:border-purple-500 px-4 py-3"
           name="etiqueta"
           placeholder="Ej: Trabajo"
           value={form.etiqueta}
@@ -150,23 +193,32 @@ function FormularioContacto({ onAgregar }) {
         />
       </div>
 
-      <div className="pt-2">
+      <div className="pt-2 flex flex-col md:flex-row gap-3">
         <button
           type="submit"
           disabled={enviando}
-          className="w-full md:w-auto bg-purple-600 hover:bg-purple-700
-                     disabled:bg-purple-300 disabled:cursor-not-allowed
-                     text-white px-6 py-3 rounded-xl font-semibold shadow-sm"
+          className="w-full md:w-auto bg-purple-600 hover:bg-purple-700 disabled:bg-purple-300 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl font-semibold shadow-sm"
         >
-          {enviando ? "Guardando..." : "Agregar contacto"}
+          {enviando
+            ? "Guardando..."
+            : contactoEnEdicion
+            ? "Guardar cambios"
+            : "Agregar contacto"}
         </button>
+
+        {contactoEnEdicion && (
+          <button
+            type="button"
+            onClick={onCancelarEdicion}
+            disabled={enviando}
+            className="w-full md:w-auto bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-3 rounded-xl font-semibold shadow-sm transition"
+          >
+            Cancelar edición
+          </button>
+        )}
       </div>
     </form>
   );
 }
-
-// Exportamos el componente parausarlo en App.jsx
-export default FormularioContacto;
-
 
 
