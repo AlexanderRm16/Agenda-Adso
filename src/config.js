@@ -1,4 +1,4 @@
-export const API_BASE_URL = "http://localhost:3002/contactos";
+export const API_BASE_URL = "https://agenda-adso-api-k6uv.onrender.com/contactos";
 
 export const APP_INFO = {
   ficha: "3412785",
